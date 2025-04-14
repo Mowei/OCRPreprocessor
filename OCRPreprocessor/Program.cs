@@ -32,17 +32,6 @@ class OCRPreprocessor
         Mat binary = new Mat();
         Cv2.AdaptiveThreshold(blurred, binary, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.BinaryInv, 15, 10);
 
-
-        // binary = IsSideAlmostWhite(binary);
-
-
-
-        //Mat src = RemoveBackground(path);
-        /*
-
-*/
-
-
         {
 
             // 找輪廓
@@ -66,12 +55,15 @@ class OCRPreprocessor
             {
                 double area = Cv2.ContourArea(contour);
                 Rect bbox = Cv2.BoundingRect(contour);
-                if (area < 5 && IsSurroundedByWhite(binary, bbox))
+                if (area < 10 && IsSurroundedByWhite(binary, bbox))
                 {
                     Cv2.DrawContours(binary, new[] { contour }, -1, Scalar.Black, -1); // 填成黑色（刪除點）
                 }
             }
         }
+
+
+
         return binary;
     }
 
@@ -122,7 +114,7 @@ class OCRPreprocessor
         int height = binary.Rows;
         int width = binary.Cols;
 
-        int lineHeight = 15; // 每行高度預估（可調）
+        int lineHeight = 5; // 每行高度預估（可調）
 
         int totalPixels = binary.Cols;
 
@@ -130,6 +122,7 @@ class OCRPreprocessor
 
         int yEnd = Math.Min(bbox.Y + lineHeight, height);
         // 統計區塊內的白色像素數
+        /*
         for (int x = 0; x < 600; x++)
         {
             for (int y = bbox.Y; y < yEnd; y++)
@@ -138,8 +131,8 @@ class OCRPreprocessor
                     whitePixelCount++;
             }
         }
-
-        for (int x = width - 600; x < width; x++)
+        */
+        for (int x = 0; x < width; x++)
         {
             for (int y = bbox.Y; y < yEnd; y++)
             {
@@ -147,9 +140,9 @@ class OCRPreprocessor
                     whitePixelCount++;
             }
         }
-        double whiteRatio = (double)whitePixelCount / (1200 * lineHeight);
+        double whiteRatio = (double)whitePixelCount / (width * lineHeight);
 
-        if (whiteRatio > 0.95)  // 閾值可調
+        if (whiteRatio > 0.90)  // 閾值可調
         {
             return true;
         }
